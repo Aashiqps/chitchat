@@ -6,6 +6,7 @@ pipeline {
         dockerhuburl = "aashiqps/chitchat"
         githuburl = "aashiqps/chitchat"
         dockerhubcrd = 'dockerhub'
+        dockerImage = ''
     }
  
     tools {
@@ -61,6 +62,16 @@ pipeline {
             sh "docker rmi $dockerhuburl:$BUILD_NUMBER"
           }
         }
+
+        stage('Deploy k8s') {
+          steps {
+            kubernetesDeploy(
+              kubeconfigId: 'k8s',
+              configs: 'k8s.yaml',
+              enableConfigSubstitution: true
+        )
+      }
+    }
 
     }
 }
