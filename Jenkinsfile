@@ -64,11 +64,12 @@ pipeline {
         }
 
         stage('Deploy k8s') {
-          steps {
-            kubernetes {
-              yamlFile 'k8s.yaml'
-              retries 2
+            steps {
+                kubernetes {
+                    yamlFile 'k8s.yaml'
+                    retries 2
+                }
             }
-
+        }
     }
 }
