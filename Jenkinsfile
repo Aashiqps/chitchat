@@ -1,5 +1,12 @@
 pipeline {
     agent any
+
+    environment {
+        dockerregistry = 'https://registry.hub.docker.com'
+        dockerhuburl = "aashiqps/chitchat"
+        githuburl = "aashiqps/chitchat"
+        dockerhubcrd = 'dockerhub'
+    }
  
     tools {
         nodejs "node_12_22_9"
@@ -8,7 +15,7 @@ pipeline {
     stages {
         stage('Cloning Git') {
             steps {
-                git 'https://github.com/Aashiqps/chitchat'
+                git 'https://github.com/' + githuburl
             }
         }
 
@@ -22,6 +29,37 @@ pipeline {
             steps {
                 sh 'npm test'
             }
+        }
+
+        stage('Build Image') {
+          steps{
+            script {
+              dockerImage = docker.build(dockerhuburl + ":$BUILD_NUMBER")
+            }
+          }
+        }
+ 
+        stage('Test Image') {
+            steps {
+                sh 'docker run -i ' + dockerhuburl + ':$BUILD_NUMBER npm test'
+            }
+        }
+ 
+        stage('Deploy Image') {
+          steps{
+            script {
+              docker.withRegistry(dockerregistry, dockerhubcrd ) {
+                dockerImage.push("${env.BUILD_NUMBER}")
+                dockerImage.push("latest")
+              }
+            }
+          }
+        }
+ 
+        stage('Remove Image') {
+          steps{
+            sh "docker rmi $dockerhuburl:$BUILD_NUMBER"
+          }
         }
 
     }
