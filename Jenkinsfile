@@ -65,13 +65,10 @@ pipeline {
 
         stage('Deploy k8s') {
           steps {
-            kubernetesDeploy(
-              kubeconfigId: 'k8s',
-              configs: 'k8s.yaml',
-              enableConfigSubstitution: true
-        )
-      }
-    }
+            kubernetes {
+              yamlFile 'k8s.yaml'
+              retries 2
+            }
 
     }
 }
